@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        <div class="row"><h1>Rock Paper Scissors</h1></div>
+        <div class="row">
+            <div class="col" id="player1-screen">
+                <p><h2 id="username-player1"></h2></p>
+            </div>
+            <div class="col" id="middle-screen"></div>
+            <div class="col" id="player2-screen">
+                    <p><h2 id="username-player1"></h2></p>
+            </div>
+        </div>
+    </div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/6.6.1/firebase-app.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#config-web-app -->
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyA43iKS0enrZng7ODiewT110R8gsHRRWB0",
+    authDomain: "rps-2-players-3ecfd.firebaseapp.com",
+    databaseURL: "https://rps-2-players-3ecfd.firebaseio.com",
+    projectId: "rps-2-players-3ecfd",
+    storageBucket: "",
+    messagingSenderId: "93591558320",
+    appId: "1:93591558320:web:e168c5ebb7d5dea0840375"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  var database = firebase.database();
+  console.log("step 1S")
+    //I need to create a matchmaking algorithm. My thinking on how to do this is to write a function that returns the first open server
+    var serverFound = false
+    var server = function(){
+        var i = 0;
+        while(!serverFound){
+            database.rel("/server-"+i).once("value", function(snapshot){
+                var serverTest = snapshot.playerNumber.val()
+                if(serverTest===0||serverTest===1||serverTest===undefined){
+                    serverFound=true
+                    if(serverTest===null){
+                        database.rel("/server-"+i).push({
+                            playerNumber: 1,
+                            player1Taken: false,
+                        })
+                    }
+                }
+                else{
+                    i++
+                }
+            })
+        console.log("things are working")
+        }
+        return database.rel("/server-"+i)
+    }
+    //Now that I'm in my server, I am going  to set user to either player 1 or player 2
+    var user
+    server.once("value").then(function(snapshot){
+        if(snapshot.player1Taken.val()===false){
+            user = "player1"
+        }
+        else{
+            user = "player2"
+        }
+    })
+    //Time to give the players usernames 
+    var username  = prompt("Pick a username")
+    if(user==="player1"){
+        server.set({
+            player1Username: username,
+        })    
+    }
+    else{
+        server.set({
+            player2Username: username
+        })
+    }
+    server.on("value", function(snapshot){
+        let a = snapshot.player1Username.val()
+        let b = snapshot.player1Username.val()
+        $("#username-player1").text(a)
+        $("#username-player2").text(b)
+    })
+
+    //
+
+
+</script>
+</body>
+</html>
